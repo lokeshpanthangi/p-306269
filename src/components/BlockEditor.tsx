@@ -5,6 +5,7 @@ import BlockRenderer from './BlockRenderer';
 import SlashCommandMenu from './SlashCommandMenu';
 import BlockOptionsMenu from './BlockOptionsMenu';
 import { Button } from '@/components/ui/button';
+import TemplateButton from './TemplateButton';
 
 interface BlockEditorProps {
   blocks: BaseBlock[];
@@ -99,8 +100,17 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ blocks, onBlocksChange }) => 
     setDragOverBlock(null);
   };
 
+  const handleInsertTemplate = (templateBlocks: BaseBlock[]) => {
+    onBlocksChange([...blocks, ...templateBlocks]);
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-1" ref={editorRef}>
+      {/* Template Button at the top */}
+      <div className="mb-4">
+        <TemplateButton onInsertTemplate={handleInsertTemplate} />
+      </div>
+
       {blocks.length === 0 && (
         <div 
           className="group flex items-start gap-2 py-2 min-h-[40px]"
