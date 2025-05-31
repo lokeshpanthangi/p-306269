@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Search, Star, Clock, FileText, Menu, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,9 +12,16 @@ interface SidebarProps {
   onToggle: () => void;
   selectedPageId?: string;
   onPageSelect: (page: Page) => void;
+  onOpenGlobalSearch: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle, selectedPageId, onPageSelect }) => {
+const Sidebar: React.FC<SidebarProps> = ({ 
+  isCollapsed, 
+  onToggle, 
+  selectedPageId, 
+  onPageSelect,
+  onOpenGlobalSearch 
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pageHierarchy, setPageHierarchy] = useState<PageHierarchy>({
     pages: [],
@@ -140,11 +146,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle, selectedPageId
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-3 py-2 bg-notion-hover border-0 text-sm placeholder-notion-text-secondary focus:ring-1 focus:ring-notion-blue"
+              onClick={onOpenGlobalSearch}
+              className="pl-9 pr-3 py-2 bg-notion-hover border-0 text-sm placeholder-notion-text-secondary focus:ring-1 focus:ring-notion-blue cursor-pointer"
+              readOnly
             />
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
               <kbd className="px-1.5 py-0.5 text-xs text-notion-text-secondary bg-white border border-notion-border rounded">
-                ⌘P
+                ⌘K
               </kbd>
             </div>
           </div>

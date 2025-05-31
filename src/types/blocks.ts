@@ -1,177 +1,193 @@
-
 export interface BaseBlock {
   id: string;
-  type: BlockType;
-  content: any;
-  properties?: BlockProperties;
-  children?: BaseBlock[];
-  parentId?: string;
+  type: string;
+  pageId: string;
+  order: number;
+  content?: any;
+  properties?: any;
+  metadata?: any;
 }
 
-export type BlockType = 
-  | 'paragraph'
-  | 'heading-1'
-  | 'heading-2' 
-  | 'heading-3'
-  | 'bulleted-list'
-  | 'numbered-list'
-  | 'quote'
-  | 'callout'
-  | 'image'
-  | 'video'
-  | 'audio'
-  | 'file'
-  | 'pdf'
-  | 'bookmark'
-  | 'link-preview'
-  | 'checkbox'
-  | 'code'
-  | 'math'
-  | 'columns'
-  | 'divider'
-  | 'toggle'
-  | 'breadcrumb'
-  | 'table-of-contents'
-  | 'database-full'
-  | 'database-inline'
-  | 'table';
-
-export interface BlockProperties {
-  backgroundColor?: string;
-  textColor?: string;
-  alignment?: 'left' | 'center' | 'right';
-  checked?: boolean;
-  language?: string;
-  url?: string;
-  caption?: string;
-  icon?: string;
-  columnCount?: number;
-  isOpen?: boolean;
-  formatting?: TextFormatting[];
-  size?: 'small' | 'medium' | 'large';
-  style?: string;
-  columns?: number;
+export interface ParagraphBlock extends BaseBlock {
+  type: 'paragraph';
+  content: string;
 }
 
-export interface TextBlock extends BaseBlock {
-  type: 'paragraph' | 'heading-1' | 'heading-2' | 'heading-3' | 'bulleted-list' | 'numbered-list' | 'quote';
+export interface HeadingBlock extends BaseBlock {
+  type: 'heading1' | 'heading2' | 'heading3';
+  content: string;
+}
+
+export interface BulletedListBlock extends BaseBlock {
+  type: 'bulleted-list';
+  content: string[];
+}
+
+export interface NumberedListBlock extends BaseBlock {
+  type: 'numbered-list';
+  content: string[];
+}
+
+export interface ToggleListBlock extends BaseBlock {
+  type: 'toggle-list';
   content: {
-    text: string;
-    formatting?: TextFormatting[];
+    title: string;
+    items: string[];
   };
 }
 
-export interface TextFormatting {
-  type: 'bold' | 'italic' | 'underline' | 'strikethrough' | 'code' | 'link';
-  start: number;
-  end: number;
-  value?: string; // for links
+export interface QuoteBlock extends BaseBlock {
+  type: 'quote';
+  content: string;
+  citation?: string;
 }
 
 export interface CalloutBlock extends BaseBlock {
   type: 'callout';
-  content: {
-    text: string;
-    icon: string;
-    formatting?: TextFormatting[];
-  };
-}
-
-export interface MediaBlock extends BaseBlock {
-  type: 'image' | 'video' | 'audio' | 'file' | 'pdf';
-  content: {
-    url: string;
-    caption?: string;
-    filename?: string;
-    size?: number;
-    width?: number;
-    height?: number;
-  };
-}
-
-export interface BookmarkBlock extends BaseBlock {
-  type: 'bookmark' | 'link-preview';
-  content: {
-    url: string;
-    title?: string;
-    description?: string;
-    favicon?: string;
-    image?: string;
-  };
-}
-
-export interface CheckboxBlock extends BaseBlock {
-  type: 'checkbox';
-  content: {
-    text: string;
-    checked: boolean;
-    formatting?: TextFormatting[];
-  };
+  content: string;
+  icon?: string;
 }
 
 export interface CodeBlock extends BaseBlock {
   type: 'code';
-  content: {
-    code: string;
-    language: string;
-  };
+  content: string;
+  language?: string;
 }
 
-export interface ToggleBlock extends BaseBlock {
-  type: 'toggle';
-  content: {
-    text: string;
-    isOpen: boolean;
-    formatting?: TextFormatting[];
-  };
+export interface ImageBlock extends BaseBlock {
+  type: 'image';
+  url: string;
+  alt?: string;
+  caption?: string;
+}
+
+export interface VideoBlock extends BaseBlock {
+  type: 'video';
+  url: string;
+  caption?: string;
+}
+
+export interface AudioBlock extends BaseBlock {
+  type: 'audio';
+  url: string;
+  caption?: string;
+}
+
+export interface FileBlock extends BaseBlock {
+  type: 'file';
+  url: string;
+  name: string;
+}
+
+export interface BookmarkBlock extends BaseBlock {
+  type: 'bookmark';
+  url: string;
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+export interface LinkPreviewBlock extends BaseBlock {
+  type: 'link-preview';
+  url: string;
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+export interface DatabaseFullBlock extends BaseBlock {
+  type: 'database-full';
+  databaseId: string;
+}
+
+export interface DatabaseInlineBlock extends BaseBlock {
+  type: 'database-inline';
+  databaseId: string;
 }
 
 export interface ColumnsBlock extends BaseBlock {
   type: 'columns';
-  content: {
-    columnCount: number;
-    columns: BaseBlock[][];
-  };
+  columns: BaseBlock[][];
+}
+
+export interface DividerBlock extends BaseBlock {
+  type: 'divider';
+}
+
+export interface BreadcrumbBlock extends BaseBlock {
+  type: 'breadcrumb';
+}
+
+export interface TableOfContentsBlock extends BaseBlock {
+  type: 'table-of-contents';
 }
 
 export interface TableBlock extends BaseBlock {
   type: 'table';
-  content: {
-    headers: string[];
-    rows: string[][];
-    hasHeader: boolean;
-  };
+  rows: string[][];
 }
 
-export interface DatabaseBlock extends BaseBlock {
-  type: 'database-full' | 'database-inline';
-  content: {
-    title: string;
-    description?: string;
-    properties: DatabaseProperty[];
-    rows: DatabaseRow[];
-    views: DatabaseView[];
-    currentView?: string;
-  };
+export interface MathBlock extends BaseBlock {
+  type: 'math';
+  expression: string;
 }
 
-export interface DatabaseProperty {
-  id: string;
+export interface TemplateBlock extends BaseBlock {
+  type: 'template';
   name: string;
-  type: 'title' | 'text' | 'number' | 'select' | 'multi-select' | 'date' | 'person' | 'files' | 'checkbox' | 'url' | 'email' | 'phone' | 'formula' | 'relation' | 'rollup' | 'created-time' | 'created-by' | 'last-edited-time' | 'last-edited-by';
-  options?: any;
+  description?: string;
+  icon?: string;
+  content: BaseBlock[];
 }
 
-export interface DatabaseRow {
-  id: string;
-  properties: Record<string, any>;
-}
+export type BlockType = 
+  | 'paragraph' 
+  | 'heading1' 
+  | 'heading2' 
+  | 'heading3'
+  | 'bulleted-list'
+  | 'numbered-list'
+  | 'toggle-list'
+  | 'quote'
+  | 'callout'
+  | 'code'
+  | 'image'
+  | 'video'
+  | 'audio'
+  | 'file'
+  | 'bookmark'
+  | 'link-preview'
+  | 'database-full'
+  | 'database-inline'
+  | 'columns'
+  | 'divider'
+  | 'breadcrumb'
+  | 'table-of-contents'
+  | 'table'
+  | 'math'
+  | 'template';
 
-export interface DatabaseView {
-  id: string;
-  name: string;
-  type: 'table' | 'board' | 'calendar' | 'timeline' | 'gallery' | 'list';
-  filters: any[];
-  sorts: any[];
-  groupBy?: string;
-}
+export type Block =
+  | ParagraphBlock
+  | HeadingBlock
+  | BulletedListBlock
+  | NumberedListBlock
+  | ToggleListBlock
+  | QuoteBlock
+  | CalloutBlock
+  | CodeBlock
+  | ImageBlock
+  | VideoBlock
+  | AudioBlock
+  | FileBlock
+  | BookmarkBlock
+  | LinkPreviewBlock
+  | DatabaseFullBlock
+  | DatabaseInlineBlock
+  | ColumnsBlock
+  | DividerBlock
+  | BreadcrumbBlock
+  | TableOfContentsBlock
+  | TableBlock
+  | MathBlock
+  | TemplateBlock;

@@ -3,99 +3,87 @@ import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, MoreHorizontal, Filter, SortAsc } from 'lucide-react';
-import { DatabaseProperty, DatabaseRow } from '@/hooks/useDatabase';
+import { Plus, MoreHorizontal } from 'lucide-react';
+
+interface DatabaseProperty {
+  id: string;
+  name: string;
+  type: 'text' | 'number' | 'select' | 'multi-select' | 'date' | 'checkbox' | 'url' | 'email' | 'phone' | 'formula' | 'relation' | 'rollup' | 'created-time' | 'created-by' | 'last-edited-time' | 'last-edited-by';
+  options?: string[];
+}
+
+interface DatabaseRow {
+  id: string;
+  properties: Record<string, any>;
+}
 
 interface DatabaseTableProps {
   properties: DatabaseProperty[];
   rows: DatabaseRow[];
   onAddRow: () => void;
-  onUpdateRow: (id: string, properties: Record<string, any>) => void;
-  onDeleteRow: (id: string) => void;
+  onUpdateRow: (rowId: string, propertyId: string, value: any) => void;
   onAddProperty: () => void;
 }
 
-const DatabaseTable = ({ 
+const DatabaseTable: React.FC<DatabaseTableProps> = ({ 
   properties, 
   rows, 
   onAddRow, 
   onUpdateRow, 
-  onDeleteRow,
   onAddProperty 
-}: DatabaseTableProps) => {
-  const [editingCell, setEditingCell] = useState<{ rowId: string; propertyId: string } | null>(null);
-
-  const handleCellEdit = (rowId: string, propertyId: string, value: any) => {
-    const row = rows.find(r => r.id === rowId);
-    if (row) {
-      const updatedProperties = {
-        ...row.properties,
-        [propertyId]: value
-      };
-      onUpdateRow(rowId, updatedProperties);
-    }
-    setEditingCell(null);
-  };
+}) => {
+  const [editingCell, setEditingCell] = useState<string | null>(null);
 
   const renderCell = (row: DatabaseRow, property: DatabaseProperty) => {
-    const value = row.properties?.[property.id] || '';
-    const isEditing = editingCell?.rowId === row.id && editingCell?.propertyId === property.id;
+    const value = row.properties[property.id] || '';
+    const cellKey = `${row.id}-${property.id}`;
+    const isEditing = editingCell === cellKey;
 
     if (isEditing) {
       return (
-        <CellEditor
-          property={property}
+        <Input
           value={value}
-          onSave={(newValue) => handleCellEdit(row.id, property.id, newValue)}
-          onCancel={() => setEditingCell(null)}
+          onChange={(e) => onUpdateRow(row.id, property.id, e.target.value)}
+          onBlur={() => setEditingCell(null)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              setEditingCell(null);
+            }
+          }}
+          autoFocus
+          className="h-8 border-0 focus:ring-1 focus:ring-blue-500"
         />
       );
     }
 
     return (
-      <div 
-        className="min-h-[32px] p-1 cursor-pointer hover:bg-gray-50 rounded"
-        onClick={() => setEditingCell({ rowId: row.id, propertyId: property.id })}
+      <div
+        className="cursor-pointer hover:bg-gray-50 px-2 py-1 rounded min-h-[32px] flex items-center"
+        onClick={() => setEditingCell(cellKey)}
       >
-        <CellDisplay property={property} value={value} />
+        {value || (
+          <span className="text-gray-400 italic">Empty</span>
+        )}
       </div>
     );
   };
 
   return (
-    <div className="border rounded-lg overflow-hidden">
-      <div className="border-b p-2 flex items-center gap-2 bg-gray-50">
-        <Button variant="outline" size="sm">
-          <Filter className="w-4 h-4 mr-1" />
-          Filter
-        </Button>
-        <Button variant="outline" size="sm">
-          <SortAsc className="w-4 h-4 mr-1" />
-          Sort
-        </Button>
-      </div>
-      
+    <div className="border border-gray-200 rounded-lg overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
             {properties.map((property) => (
-              <TableHead key={property.id} className="relative group">
+              <TableHead key={property.id} className="bg-gray-50">
                 <div className="flex items-center gap-2">
-                  <PropertyIcon type={property.type} />
                   <span>{property.name}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
-                  >
-                    <MoreHorizontal className="w-3 h-3" />
-                  </Button>
+                  <span className="text-xs text-gray-400 uppercase">
+                    {property.type}
+                  </span>
                 </div>
               </TableHead>
             ))}
-            <TableHead className="w-12">
+            <TableHead className="w-12 bg-gray-50">
               <Button
                 variant="ghost"
                 size="sm"
@@ -109,7 +97,7 @@ const DatabaseTable = ({
         </TableHeader>
         <TableBody>
           {rows.map((row) => (
-            <TableRow key={row.id} className="group">
+            <TableRow key={row.id}>
               {properties.map((property) => (
                 <TableCell key={property.id} className="p-0">
                   {renderCell(row, property)}
@@ -119,8 +107,7 @@ const DatabaseTable = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onDeleteRow(row.id)}
-                  className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
+                  className="h-6 w-6 p-0"
                 >
                   <MoreHorizontal className="w-3 h-3" />
                 </Button>
@@ -132,10 +119,10 @@ const DatabaseTable = ({
               <Button
                 variant="ghost"
                 onClick={onAddRow}
-                className="w-full justify-start text-gray-500"
+                className="w-full justify-start text-gray-500 hover:text-gray-700"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                New
+                New row
               </Button>
             </TableCell>
           </TableRow>
@@ -143,121 +130,6 @@ const DatabaseTable = ({
       </Table>
     </div>
   );
-};
-
-const PropertyIcon = ({ type }: { type: string }) => {
-  const icons = {
-    title: '📝',
-    text: '📄',
-    number: '🔢',
-    select: '🏷️',
-    'multi-select': '🏷️',
-    date: '📅',
-    checkbox: '☑️',
-    url: '🔗',
-    email: '📧',
-    relation: '🔗',
-    formula: '🧮'
-  };
-
-  return <span className="text-sm">{icons[type as keyof typeof icons] || '📄'}</span>;
-};
-
-const CellDisplay = ({ property, value }: { property: DatabaseProperty; value: any }) => {
-  switch (property.type) {
-    case 'checkbox':
-      return <Checkbox checked={!!value} disabled />;
-    case 'select':
-      return value ? <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">{value}</span> : null;
-    case 'date':
-      return value ? new Date(value).toLocaleDateString() : null;
-    default:
-      return <span className="text-sm">{value || ''}</span>;
-  }
-};
-
-const CellEditor = ({ 
-  property, 
-  value, 
-  onSave, 
-  onCancel 
-}: { 
-  property: DatabaseProperty; 
-  value: any; 
-  onSave: (value: any) => void; 
-  onCancel: () => void; 
-}) => {
-  const [editValue, setEditValue] = useState(value);
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      onSave(editValue);
-    } else if (e.key === 'Escape') {
-      onCancel();
-    }
-  };
-
-  switch (property.type) {
-    case 'checkbox':
-      return (
-        <Checkbox
-          checked={!!editValue}
-          onCheckedChange={(checked) => onSave(checked)}
-          autoFocus
-        />
-      );
-    case 'select':
-      const options = property.options as { options?: string[] } | undefined;
-      return (
-        <Select value={editValue} onValueChange={onSave}>
-          <SelectTrigger className="h-8">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {options?.options?.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      );
-    case 'number':
-      return (
-        <Input
-          type="number"
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={() => onSave(editValue)}
-          onKeyDown={handleKeyDown}
-          className="h-8"
-          autoFocus
-        />
-      );
-    case 'date':
-      return (
-        <Input
-          type="date"
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={() => onSave(editValue)}
-          onKeyDown={handleKeyDown}
-          className="h-8"
-          autoFocus
-        />
-      );
-    default:
-      return (
-        <Input
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={() => onSave(editValue)}
-          onKeyDown={handleKeyDown}
-          className="h-8"
-          autoFocus
-        />
-      );
-  }
 };
 
 export default DatabaseTable;

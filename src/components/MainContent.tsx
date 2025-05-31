@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Search, FileText, Star, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -104,7 +103,14 @@ const MainContent: React.FC<MainContentProps> = ({ currentPage }) => {
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         {showTemplateGallery ? (
-          <TemplateGallery onClose={() => setShowTemplateGallery(false)} />
+          <TemplateGallery 
+            onClose={() => setShowTemplateGallery(false)}
+            onSelectTemplate={(template) => {
+              // Handle template selection
+              console.log('Selected template:', template);
+              setShowTemplateGallery(false);
+            }}
+          />
         ) : (
           <div className="max-w-4xl mx-auto p-6">
             {currentPage ? (

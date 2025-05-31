@@ -1,173 +1,166 @@
-
 import React, { useState, useEffect } from 'react';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { BlockType } from '@/types/blocks';
-import { 
-  Type, 
-  Heading1, 
-  Heading2, 
-  Heading3, 
-  List, 
-  ListOrdered, 
-  Quote, 
-  MessageSquare, 
-  Image, 
-  Video, 
-  Music,
-  FileText, 
-  CheckSquare, 
-  Code, 
-  Calculator,
-  Columns,
-  Minus,
-  ChevronRight,
-  Bookmark,
-  Link,
-  Grid3X3,
-  Database,
-  Table,
-  Navigation,
-  List as ListIcon,
-  Layers
-} from 'lucide-react';
+import { Command, CommandInput, CommandList, CommandItem, CommandGroup, CommandEmpty } from "@/components/ui/command"
 
-interface SlashCommandMenuProps {
+interface CommandItemType {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  type: string;
+}
+
+const defaultCommands = {
+  basic: [
+    { id: 'paragraph', title: 'Paragraph', description: 'Plain text', icon: '📄', type: 'paragraph' },
+    { id: 'heading1', title: 'Heading 1', description: 'Large title', icon: 'H1', type: 'heading1' },
+    { id: 'heading2', title: 'Heading 2', description: 'Medium title', icon: 'H2', type: 'heading2' },
+    { id: 'heading3', title: 'Heading 3', description: 'Small title', icon: 'H3', type: 'heading3' },
+    { id: 'bulleted-list', title: 'Bulleted list', description: 'List with bullets', icon: '•', type: 'bulleted-list' },
+    { id: 'numbered-list', title: 'Numbered list', description: 'List with numbers', icon: '1.', type: 'numbered-list' },
+    { id: 'toggle-list', title: 'Toggle list', description: 'Collapsible list', icon: '▶', type: 'toggle-list' },
+    { id: 'quote', title: 'Quote', description: 'Emphasized text', icon: '❝', type: 'quote' },
+    { id: 'callout', title: 'Callout', description: 'Highlighted message', icon: '📢', type: 'callout' },
+    { id: 'code', title: 'Code', description: 'Code block', icon: '<>', type: 'code' },
+    { id: 'divider', title: 'Divider', description: 'Horizontal line', icon: '---', type: 'divider' },
+  ],
+  media: [
+    { id: 'image', title: 'Image', description: 'Add an image', icon: '🖼️', type: 'image' },
+    { id: 'video', title: 'Video', description: 'Embed a video', icon: '🎬', type: 'video' },
+    { id: 'audio', title: 'Audio', description: 'Add an audio file', icon: '🎵', type: 'audio' },
+    { id: 'file', title: 'File', description: 'Attach a file', icon: '📎', type: 'file' },
+    { id: 'bookmark', title: 'Bookmark', description: 'Link preview', icon: '🔗', type: 'bookmark' },
+  ],
+  database: [
+    { id: 'database-inline', title: 'Database inline', description: 'Create a table', icon: '📊', type: 'database-inline' },
+    { id: 'database-full', title: 'Database full page', description: 'Full page table', icon: '🗄️', type: 'database-full' },
+  ],
+  advanced: [
+    { id: 'table', title: 'Table', description: 'Insert a table', icon: 'table', type: 'table' },
+    { id: 'math', title: 'Math equation', description: 'Insert an equation', icon: '∑', type: 'math' },
+    { id: 'template', title: 'Template button', description: 'Insert a template button', icon: 'T', type: 'template' },
+  ]
+};
+
+export interface SlashCommandMenuProps {
   position: { x: number; y: number };
-  onSelectBlock: (type: BlockType) => void;
+  onSelectCommand: (command: any) => void;
   onClose: () => void;
 }
 
-const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
-  position,
-  onSelectBlock,
-  onClose
-}) => {
+const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({ position, onSelectCommand, onClose }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [commands, setCommands] = useState(defaultCommands);
+  const [filteredCommands, setFilteredCommands] = useState(commands);
 
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
+    // Filter commands based on search query
+    const filtered = {
+      basic: commands.basic.filter(cmd => cmd.title.toLowerCase().includes(searchQuery.toLowerCase()) || cmd.description.toLowerCase().includes(searchQuery.toLowerCase())),
+      media: commands.media.filter(cmd => cmd.title.toLowerCase().includes(searchQuery.toLowerCase()) || cmd.description.toLowerCase().includes(searchQuery.toLowerCase())),
+      database: commands.database.filter(cmd => cmd.title.toLowerCase().includes(searchQuery.toLowerCase()) || cmd.description.toLowerCase().includes(searchQuery.toLowerCase())),
+      advanced: commands.advanced.filter(cmd => cmd.title.toLowerCase().includes(searchQuery.toLowerCase()) || cmd.description.toLowerCase().includes(searchQuery.toLowerCase())),
     };
-
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Element;
-      if (!target.closest('[data-slash-menu]')) {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleEscape);
-    document.addEventListener('mousedown', handleClickOutside);
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [onClose]);
-
-  const blockTypes = [
-    {
-      group: 'Basic blocks',
-      items: [
-        { type: 'paragraph' as BlockType, icon: Type, label: 'Text', description: 'Just start writing with plain text.' },
-        { type: 'heading-1' as BlockType, icon: Heading1, label: 'Heading 1', description: 'Big section heading.' },
-        { type: 'heading-2' as BlockType, icon: Heading2, label: 'Heading 2', description: 'Medium section heading.' },
-        { type: 'heading-3' as BlockType, icon: Heading3, label: 'Heading 3', description: 'Small section heading.' },
-        { type: 'bulleted-list' as BlockType, icon: List, label: 'Bulleted list', description: 'Create a simple bulleted list.' },
-        { type: 'numbered-list' as BlockType, icon: ListOrdered, label: 'Numbered list', description: 'Create a list with numbering.' },
-        { type: 'checkbox' as BlockType, icon: CheckSquare, label: 'To-do list', description: 'Track tasks with a to-do list.' },
-        { type: 'toggle' as BlockType, icon: ChevronRight, label: 'Toggle list', description: 'Toggles can hide and show content inside.' }
-      ]
-    },
-    {
-      group: 'Text formatting',
-      items: [
-        { type: 'quote' as BlockType, icon: Quote, label: 'Quote', description: 'Capture a quote.' },
-        { type: 'callout' as BlockType, icon: MessageSquare, label: 'Callout', description: 'Make writing stand out.' },
-        { type: 'code' as BlockType, icon: Code, label: 'Code', description: 'Capture a code snippet.' },
-        { type: 'math' as BlockType, icon: Calculator, label: 'Math equation', description: 'Display mathematical expressions.' }
-      ]
-    },
-    {
-      group: 'Media',
-      items: [
-        { type: 'image' as BlockType, icon: Image, label: 'Image', description: 'Upload or embed with a link.' },
-        { type: 'video' as BlockType, icon: Video, label: 'Video', description: 'Embed from YouTube, Vimeo, etc.' },
-        { type: 'audio' as BlockType, icon: Music, label: 'Audio', description: 'Embed audio files.' },
-        { type: 'file' as BlockType, icon: FileText, label: 'File', description: 'Upload a file.' },
-        { type: 'pdf' as BlockType, icon: FileText, label: 'PDF', description: 'Embed a PDF document.' },
-        { type: 'bookmark' as BlockType, icon: Bookmark, label: 'Web bookmark', description: 'Save a link as a visual bookmark.' },
-        { type: 'link-preview' as BlockType, icon: Link, label: 'Link preview', description: 'Create a visual preview of any link.' }
-      ]
-    },
-    {
-      group: 'Database',
-      items: [
-        { type: 'database-full' as BlockType, icon: Database, label: 'Database - Full page', description: 'Create a database.' },
-        { type: 'database-inline' as BlockType, icon: Grid3X3, label: 'Database - Inline', description: 'Create a database inside this page.' },
-        { type: 'table' as BlockType, icon: Table, label: 'Simple table', description: 'Add a simple table.' }
-      ]
-    },
-    {
-      group: 'Layout',
-      items: [
-        { type: 'columns' as BlockType, icon: Columns, label: 'Columns', description: 'Create columns of content.' },
-        { type: 'divider' as BlockType, icon: Minus, label: 'Divider', description: 'Visually divide blocks.' },
-        { type: 'breadcrumb' as BlockType, icon: Navigation, label: 'Breadcrumb', description: 'Show page hierarchy.' },
-        { type: 'table-of-contents' as BlockType, icon: ListIcon, label: 'Table of contents', description: 'Auto-generate table of contents.' }
-      ]
-    }
-  ];
-
-  const filteredBlockTypes = blockTypes.map(group => ({
-    ...group,
-    items: group.items.filter(item => 
-      item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  })).filter(group => group.items.length > 0);
+    setFilteredCommands(filtered);
+  }, [searchQuery, commands]);
 
   return (
-    <div
-      data-slash-menu
-      className="fixed z-50 w-80 bg-white border border-notion-border rounded-lg shadow-lg"
-      style={{
-        left: position.x,
+    <div 
+      className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto"
+      style={{ 
+        left: position.x, 
         top: position.y,
-        maxHeight: '400px'
+        minWidth: '280px'
       }}
     >
-      <Command className="rounded-lg border-0">
-        <CommandInput
-          placeholder="Search for blocks..."
+      <Command>
+        <CommandInput 
+          placeholder="Type a command..." 
           value={searchQuery}
           onValueChange={setSearchQuery}
-          className="border-0 border-b border-notion-border rounded-none"
+          autoFocus
         />
-        <CommandList className="max-h-[300px]">
-          <CommandEmpty>No blocks found.</CommandEmpty>
-          {filteredBlockTypes.map((group) => (
-            <CommandGroup key={group.group} heading={group.group}>
-              {group.items.map((item) => (
-                <CommandItem
-                  key={item.type}
-                  onSelect={() => {
-                    onSelectBlock(item.type);
-                    onClose();
-                  }}
-                  className="flex items-start gap-3 p-3 cursor-pointer hover:bg-notion-hover"
-                >
-                  <item.icon className="w-5 h-5 mt-0.5 text-notion-text-secondary" />
-                  <div className="flex-1">
-                    <div className="font-medium text-notion-text">{item.label}</div>
-                    <div className="text-sm text-notion-text-secondary">{item.description}</div>
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          ))}
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          
+          {/* Basic Blocks */}
+          <CommandGroup heading="Basic blocks">
+            {filteredCommands.basic.map((command) => (
+              <CommandItem
+                key={command.id}
+                onSelect={() => {
+                  onSelectCommand(command);
+                  onClose();
+                }}
+                className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-gray-100"
+              >
+                <span className="text-lg">{command.icon}</span>
+                <div>
+                  <div className="font-medium">{command.title}</div>
+                  <div className="text-sm text-gray-500">{command.description}</div>
+                </div>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+
+          {/* Media */}
+          <CommandGroup heading="Media">
+            {filteredCommands.media.map((command) => (
+              <CommandItem
+                key={command.id}
+                onSelect={() => {
+                  onSelectCommand(command);
+                  onClose();
+                }}
+                className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-gray-100"
+              >
+                <span className="text-lg">{command.icon}</span>
+                <div>
+                  <div className="font-medium">{command.title}</div>
+                  <div className="text-sm text-gray-500">{command.description}</div>
+                </div>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+
+          {/* Database */}
+          <CommandGroup heading="Database">
+            {filteredCommands.database.map((command) => (
+              <CommandItem
+                key={command.id}
+                onSelect={() => {
+                  onSelectCommand(command);
+                  onClose();
+                }}
+                className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-gray-100"
+              >
+                <span className="text-lg">{command.icon}</span>
+                <div>
+                  <div className="font-medium">{command.title}</div>
+                  <div className="text-sm text-gray-500">{command.description}</div>
+                </div>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+
+          {/* Advanced */}
+          <CommandGroup heading="Advanced">
+            {filteredCommands.advanced.map((command) => (
+              <CommandItem
+                key={command.id}
+                onSelect={() => {
+                  onSelectCommand(command);
+                  onClose();
+                }}
+                className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-gray-100"
+              >
+                <span className="text-lg">{command.icon}</span>
+                <div>
+                  <div className="font-medium">{command.title}</div>
+                  <div className="text-sm text-gray-500">{command.description}</div>
+                </div>
+              </CommandItem>
+            ))}
+          </CommandGroup>
         </CommandList>
       </Command>
     </div>
