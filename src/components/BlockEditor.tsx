@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Plus, MoreHorizontal, GripVertical } from 'lucide-react';
 import { BaseBlock, BlockType } from '@/types/blocks';
@@ -250,16 +249,41 @@ const getDefaultContentForType = (type: BlockType): any => {
       return { text: '', checked: false, formatting: [] };
     case 'code':
       return { code: '', language: 'javascript' };
+    case 'math':
+      return { formula: '' };
     case 'toggle':
       return { text: '', isOpen: false, formatting: [] };
     case 'divider':
       return {};
     case 'image':
     case 'video':
+    case 'audio':
     case 'file':
+    case 'pdf':
       return { url: '', caption: '' };
+    case 'bookmark':
+    case 'link-preview':
+      return { url: '', title: '', description: '', favicon: '', image: '' };
+    case 'table':
+      return { 
+        headers: ['Column 1', 'Column 2'], 
+        rows: [['', '']], 
+        hasHeader: true 
+      };
     case 'columns':
-      return { columnCount: 2 };
+      return { columnCount: 2, columns: [[], []] };
+    case 'breadcrumb':
+      return { path: ['Home', 'Current Page'] };
+    case 'table-of-contents':
+      return { headings: [] };
+    case 'database-full':
+    case 'database-inline':
+      return { 
+        title: 'Untitled Database',
+        properties: [],
+        rows: [],
+        views: []
+      };
     default:
       return {};
   }
@@ -272,6 +296,12 @@ const isBlockEmpty = (block: BaseBlock): boolean => {
   }
   if (typeof block.content?.code === 'string') {
     return block.content.code.trim() === '';
+  }
+  if (typeof block.content?.formula === 'string') {
+    return block.content.formula.trim() === '';
+  }
+  if (typeof block.content?.url === 'string') {
+    return block.content.url.trim() === '';
   }
   return false;
 };

@@ -1,10 +1,12 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { BaseBlock } from '@/types/blocks';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ChevronRight, ChevronDown } from 'lucide-react';
+import { ChevronRight, ChevronDown, Navigation, List } from 'lucide-react';
+import MediaBlockRenderer from './MediaBlockRenderer';
+import BookmarkBlockRenderer from './BookmarkBlockRenderer';
+import TableBlockRenderer from './TableBlockRenderer';
 
 interface BlockRendererProps {
   block: BaseBlock;
@@ -90,7 +92,142 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 
   const containerClass = `${getBackgroundStyle()} ${getBackgroundStyle() ? 'p-2 rounded' : ''}`;
 
+  // Handle media blocks
+  if (['image', 'video', 'audio', 'file', 'pdf'].includes(block.type)) {
+    return (
+      <div className={containerClass}>
+        <MediaBlockRenderer
+          block={block}
+          onUpdate={onUpdate}
+          onFocus={onFocus}
+        />
+      </div>
+    );
+  }
+
+  // Handle bookmark and link preview blocks
+  if (['bookmark', 'link-preview'].includes(block.type)) {
+    return (
+      <div className={containerClass}>
+        <BookmarkBlockRenderer
+          block={block}
+          onUpdate={onUpdate}
+          onFocus={onFocus}
+        />
+      </div>
+    );
+  }
+
+  // Handle table block
+  if (block.type === 'table') {
+    return (
+      <div className={containerClass}>
+        <TableBlockRenderer
+          block={block}
+          onUpdate={onUpdate}
+          onFocus={onFocus}
+        />
+      </div>
+    );
+  }
+
   switch (block.type) {
+    case 'columns':
+      const columnCount = block.content?.columnCount || 2;
+      const columns = block.content?.columns || Array(columnCount).fill([]);
+      
+      return (
+        <div className={containerClass}>
+          <div className={`grid gap-4 grid-cols-${columnCount}`}>
+            {columns.map((column: any[], index: number) => (
+              <div
+                key={index}
+                className="border-2 border-dashed border-gray-200 rounded p-4 min-h-[100px]"
+              >
+                <div className="text-sm text-gray-500 text-center">
+                  Column {index + 1}
+                  <br />
+                  <span className="text-xs">Drop blocks here</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 'breadcrumb':
+      return (
+        <div className={containerClass}>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Navigation className="w-4 h-4" />
+            <span>Home</span>
+            <span>/</span>
+            <span>Current Page</span>
+          </div>
+        </div>
+      );
+
+    case 'table-of-contents':
+      return (
+        <div className={containerClass}>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 font-medium">
+              <List className="w-4 h-4" />
+              Table of Contents
+            </div>
+            <div className="space-y-1 text-sm text-gray-600 pl-6">
+              <div className="hover:text-gray-900 cursor-pointer">1. Introduction</div>
+              <div className="hover:text-gray-900 cursor-pointer pl-4">1.1. Overview</div>
+              <div className="hover:text-gray-900 cursor-pointer">2. Getting Started</div>
+              <div className="hover:text-gray-900 cursor-pointer">3. Advanced Features</div>
+            </div>
+          </div>
+        </div>
+      );
+
+    case 'math':
+      return (
+        <div className={containerClass}>
+          <div className="bg-gray-50 rounded p-3 border">
+            {isEditing ? (
+              <Textarea
+                ref={inputRef as React.RefObject<HTMLTextAreaElement>}
+                value={block.content?.formula || ''}
+                onChange={(e) => onUpdate({ ...block.content, formula: e.target.value })}
+                placeholder="Enter LaTeX formula..."
+                className={`${commonProps.className} font-mono text-sm bg-transparent min-h-[60px]`}
+                {...commonProps}
+              />
+            ) : (
+              <div 
+                className="font-mono text-sm cursor-text min-h-[24px]"
+                onClick={handleClick}
+              >
+                {block.content?.formula || 'Enter LaTeX formula...'}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+
+    case 'database-full':
+    case 'database-inline':
+      return (
+        <div className={containerClass}>
+          <div className="border rounded-lg p-6 bg-gray-50">
+            <div className="text-center space-y-2">
+              <div className="text-lg font-medium">Database</div>
+              <div className="text-sm text-gray-600">
+                {block.type === 'database-full' ? 'Full page database' : 'Inline database'}
+              </div>
+              <div className="text-xs text-gray-500">
+                Database functionality coming soon...
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+
     case 'paragraph':
       return (
         <div className={containerClass}>

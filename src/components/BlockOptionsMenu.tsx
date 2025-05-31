@@ -28,7 +28,17 @@ const BlockOptionsMenu: React.FC<BlockOptionsMenuProps> = ({
     { type: 'checkbox', label: 'To-do list' },
     { type: 'quote', label: 'Quote' },
     { type: 'callout', label: 'Callout' },
-    { type: 'code', label: 'Code' }
+    { type: 'code', label: 'Code' },
+    { type: 'toggle', label: 'Toggle' },
+    { type: 'divider', label: 'Divider' },
+    { type: 'image', label: 'Image' },
+    { type: 'video', label: 'Video' },
+    { type: 'audio', label: 'Audio' },
+    { type: 'file', label: 'File' },
+    { type: 'bookmark', label: 'Bookmark' },
+    { type: 'table', label: 'Table' },
+    { type: 'columns', label: 'Columns' },
+    { type: 'math', label: 'Math equation' }
   ];
 
   return (
@@ -56,7 +66,7 @@ const BlockOptionsMenu: React.FC<BlockOptionsMenuProps> = ({
           
           <div className="px-2 py-1">
             <div className="text-xs font-medium text-notion-text-secondary mb-1">Turn into</div>
-            <div className="space-y-1">
+            <div className="space-y-1 max-h-48 overflow-y-auto">
               {turnIntoOptions.map((option) => (
                 <Button
                   key={option.type}

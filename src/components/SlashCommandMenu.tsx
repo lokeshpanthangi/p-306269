@@ -13,13 +13,22 @@ import {
   MessageSquare, 
   Image, 
   Video, 
+  Music,
   FileText, 
   CheckSquare, 
   Code, 
   Calculator,
   Columns,
   Minus,
-  ChevronRight
+  ChevronRight,
+  Bookmark,
+  Link,
+  Grid3X3,
+  Database,
+  Table,
+  Navigation,
+  List as ListIcon,
+  Layers
 } from 'lucide-react';
 
 interface SlashCommandMenuProps {
@@ -73,11 +82,12 @@ const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
       ]
     },
     {
-      group: 'Database',
+      group: 'Text formatting',
       items: [
         { type: 'quote' as BlockType, icon: Quote, label: 'Quote', description: 'Capture a quote.' },
         { type: 'callout' as BlockType, icon: MessageSquare, label: 'Callout', description: 'Make writing stand out.' },
-        { type: 'divider' as BlockType, icon: Minus, label: 'Divider', description: 'Visually divide blocks.' }
+        { type: 'code' as BlockType, icon: Code, label: 'Code', description: 'Capture a code snippet.' },
+        { type: 'math' as BlockType, icon: Calculator, label: 'Math equation', description: 'Display mathematical expressions.' }
       ]
     },
     {
@@ -85,15 +95,28 @@ const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
       items: [
         { type: 'image' as BlockType, icon: Image, label: 'Image', description: 'Upload or embed with a link.' },
         { type: 'video' as BlockType, icon: Video, label: 'Video', description: 'Embed from YouTube, Vimeo, etc.' },
-        { type: 'file' as BlockType, icon: FileText, label: 'File', description: 'Upload a file.' }
+        { type: 'audio' as BlockType, icon: Music, label: 'Audio', description: 'Embed audio files.' },
+        { type: 'file' as BlockType, icon: FileText, label: 'File', description: 'Upload a file.' },
+        { type: 'pdf' as BlockType, icon: FileText, label: 'PDF', description: 'Embed a PDF document.' },
+        { type: 'bookmark' as BlockType, icon: Bookmark, label: 'Web bookmark', description: 'Save a link as a visual bookmark.' },
+        { type: 'link-preview' as BlockType, icon: Link, label: 'Link preview', description: 'Create a visual preview of any link.' }
       ]
     },
     {
-      group: 'Advanced blocks',
+      group: 'Database',
       items: [
-        { type: 'code' as BlockType, icon: Code, label: 'Code', description: 'Capture a code snippet.' },
-        { type: 'math' as BlockType, icon: Calculator, label: 'Math equation', description: 'Display mathematical expressions.' },
-        { type: 'columns' as BlockType, icon: Columns, label: 'Columns', description: 'Create columns of content.' }
+        { type: 'database-full' as BlockType, icon: Database, label: 'Database - Full page', description: 'Create a database.' },
+        { type: 'database-inline' as BlockType, icon: Grid3X3, label: 'Database - Inline', description: 'Create a database inside this page.' },
+        { type: 'table' as BlockType, icon: Table, label: 'Simple table', description: 'Add a simple table.' }
+      ]
+    },
+    {
+      group: 'Layout',
+      items: [
+        { type: 'columns' as BlockType, icon: Columns, label: 'Columns', description: 'Create columns of content.' },
+        { type: 'divider' as BlockType, icon: Minus, label: 'Divider', description: 'Visually divide blocks.' },
+        { type: 'breadcrumb' as BlockType, icon: Navigation, label: 'Breadcrumb', description: 'Show page hierarchy.' },
+        { type: 'table-of-contents' as BlockType, icon: ListIcon, label: 'Table of contents', description: 'Auto-generate table of contents.' }
       ]
     }
   ];

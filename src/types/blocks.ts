@@ -19,13 +19,22 @@ export type BlockType =
   | 'callout'
   | 'image'
   | 'video'
+  | 'audio'
   | 'file'
+  | 'pdf'
+  | 'bookmark'
+  | 'link-preview'
   | 'checkbox'
   | 'code'
   | 'math'
   | 'columns'
   | 'divider'
-  | 'toggle';
+  | 'toggle'
+  | 'breadcrumb'
+  | 'table-of-contents'
+  | 'database-full'
+  | 'database-inline'
+  | 'table';
 
 export interface BlockProperties {
   backgroundColor?: string;
@@ -38,6 +47,10 @@ export interface BlockProperties {
   icon?: string;
   columnCount?: number;
   isOpen?: boolean;
+  formatting?: TextFormatting[];
+  size?: 'small' | 'medium' | 'large';
+  style?: string;
+  columns?: number;
 }
 
 export interface TextBlock extends BaseBlock {
@@ -65,12 +78,25 @@ export interface CalloutBlock extends BaseBlock {
 }
 
 export interface MediaBlock extends BaseBlock {
-  type: 'image' | 'video' | 'file';
+  type: 'image' | 'video' | 'audio' | 'file' | 'pdf';
   content: {
     url: string;
     caption?: string;
     filename?: string;
     size?: number;
+    width?: number;
+    height?: number;
+  };
+}
+
+export interface BookmarkBlock extends BaseBlock {
+  type: 'bookmark' | 'link-preview';
+  content: {
+    url: string;
+    title?: string;
+    description?: string;
+    favicon?: string;
+    image?: string;
   };
 }
 
@@ -98,4 +124,54 @@ export interface ToggleBlock extends BaseBlock {
     isOpen: boolean;
     formatting?: TextFormatting[];
   };
+}
+
+export interface ColumnsBlock extends BaseBlock {
+  type: 'columns';
+  content: {
+    columnCount: number;
+    columns: BaseBlock[][];
+  };
+}
+
+export interface TableBlock extends BaseBlock {
+  type: 'table';
+  content: {
+    headers: string[];
+    rows: string[][];
+    hasHeader: boolean;
+  };
+}
+
+export interface DatabaseBlock extends BaseBlock {
+  type: 'database-full' | 'database-inline';
+  content: {
+    title: string;
+    description?: string;
+    properties: DatabaseProperty[];
+    rows: DatabaseRow[];
+    views: DatabaseView[];
+    currentView?: string;
+  };
+}
+
+export interface DatabaseProperty {
+  id: string;
+  name: string;
+  type: 'title' | 'text' | 'number' | 'select' | 'multi-select' | 'date' | 'person' | 'files' | 'checkbox' | 'url' | 'email' | 'phone' | 'formula' | 'relation' | 'rollup' | 'created-time' | 'created-by' | 'last-edited-time' | 'last-edited-by';
+  options?: any;
+}
+
+export interface DatabaseRow {
+  id: string;
+  properties: Record<string, any>;
+}
+
+export interface DatabaseView {
+  id: string;
+  name: string;
+  type: 'table' | 'board' | 'calendar' | 'timeline' | 'gallery' | 'list';
+  filters: any[];
+  sorts: any[];
+  groupBy?: string;
 }
