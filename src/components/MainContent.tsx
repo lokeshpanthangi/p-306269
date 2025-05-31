@@ -1,189 +1,128 @@
 
 import React, { useState } from 'react';
-import { Share2, MessageCircle, ChevronRight, Smile, MoreHorizontal, Template, Bookmark } from 'lucide-react';
+import { Plus, Search, FileText, Star, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import BlockEditor from './BlockEditor';
 import TemplateGallery from './templates/TemplateGallery';
-import TemplateManager from './templates/TemplateManager';
-import { BaseBlock } from '@/types/blocks';
-import { PageTemplate, DatabaseTemplate } from '@/types/templates';
-import { templateService } from '@/services/templateService';
+import { Page } from '@/types/pages';
 
-const MainContent: React.FC = () => {
-  const [pageTitle, setPageTitle] = useState('Untitled');
-  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+interface MainContentProps {
+  currentPage?: Page | null;
+}
+
+const MainContent: React.FC<MainContentProps> = ({ currentPage }) => {
   const [showTemplateGallery, setShowTemplateGallery] = useState(false);
-  const [showTemplateManager, setShowTemplateManager] = useState(false);
-  const [blocks, setBlocks] = useState<BaseBlock[]>([
-    {
-      id: 'block-1',
-      type: 'paragraph',
-      content: {
-        text: 'Welcome to your new Notion clone! This is a sample paragraph. You can start typing to edit this content.',
-        formatting: []
-      }
-    }
-  ]);
+  const [pageTitle, setPageTitle] = useState(currentPage?.title || 'Untitled');
 
-  const handleUseTemplate = async (template: PageTemplate | DatabaseTemplate) => {
-    if ('blocks' in template) {
-      // Page template
-      try {
-        const templateBlocks = await templateService.createPageFromTemplate(template.id);
-        setBlocks(templateBlocks);
-        setPageTitle(template.title);
-        setShowTemplateGallery(false);
-      } catch (error) {
-        console.error('Failed to load template:', error);
-      }
-    } else {
-      // Database template - could be implemented to create a database block
-      console.log('Database template selected:', template);
-      setShowTemplateGallery(false);
-    }
-  };
-
-  const handleSaveAsTemplate = (templateId: string) => {
-    console.log('Template saved with ID:', templateId);
-    setShowTemplateManager(false);
-    // Could show a success toast here
-  };
+  React.useEffect(() => {
+    setPageTitle(currentPage?.title || 'Untitled');
+  }, [currentPage]);
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white">
-      {/* Breadcrumb */}
-      <div className="px-6 py-3 border-b border-notion-border">
-        <div className="flex items-center gap-2 text-sm text-notion-text-secondary">
-          <span className="hover:text-notion-text cursor-pointer transition-colors">Home</span>
-          <ChevronRight className="w-4 h-4" />
-          <span className="text-notion-text">{pageTitle}</span>
+    <div className="flex-1 flex flex-col h-full bg-notion-bg">
+      {/* Page Cover */}
+      {currentPage?.cover && (
+        <div className="h-64 bg-gray-100 relative overflow-hidden">
+          <img 
+            src={currentPage.cover} 
+            alt="Page cover" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-20" />
         </div>
-      </div>
+      )}
 
       {/* Header */}
-      <div className="px-6 py-4 border-b border-notion-border">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4 flex-1">
-            {/* Icon Picker */}
-            <Button
-              variant="ghost"
-              className="w-16 h-16 p-0 hover:bg-notion-hover notion-button text-4xl"
-            >
-              <Smile className="w-8 h-8 text-notion-text-secondary" />
-            </Button>
-            
-            {/* Title */}
-            <div className="flex-1">
+      <div className="border-b border-notion-border bg-white">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-3 flex-1">
+              {/* Page Icon */}
+              <div className="text-4xl cursor-pointer hover:bg-notion-hover rounded p-1">
+                {currentPage?.icon || '📄'}
+              </div>
+              
+              {/* Page Title */}
               <Input
                 value={pageTitle}
                 onChange={(e) => setPageTitle(e.target.value)}
-                className="text-3xl font-bold border-none p-0 bg-transparent notion-input text-notion-text placeholder-notion-text-secondary focus:ring-0"
+                className="text-xl font-semibold border-0 bg-transparent text-notion-text placeholder-notion-text-secondary focus:ring-0 flex-1"
                 placeholder="Untitled"
               />
+              
+              {/* Favorite Button */}
+              {currentPage && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-notion-text-secondary hover:text-notion-text"
+                >
+                  <Star className={`w-4 h-4 ${currentPage.isFavorite ? 'fill-yellow-400 text-yellow-400' : ''}`} />
+                </Button>
+              )}
             </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowTemplateGallery(true)}
-              className="hover:bg-notion-hover notion-button"
-            >
-              <Template className="w-4 h-4 mr-2" />
-              Templates
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowTemplateManager(true)}
-              className="hover:bg-notion-hover notion-button"
-            >
-              <Bookmark className="w-4 h-4 mr-2" />
-              Save as Template
-            </Button>
             
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsCommentsOpen(!isCommentsOpen)}
-              className="hover:bg-notion-hover notion-button"
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Comments
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:bg-notion-hover notion-button"
-            >
-              <Share2 className="w-4 h-4 mr-2" />
-              Share
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:bg-notion-hover notion-button"
-            >
-              <MoreHorizontal className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Content Area */}
-      <div className="flex-1 flex">
-        <div className="flex-1 p-6">
-          <BlockEditor 
-            blocks={blocks}
-            onBlocksChange={setBlocks}
-          />
-        </div>
-
-        {/* Comments Panel */}
-        {isCommentsOpen && (
-          <div className="w-80 border-l border-notion-border bg-white p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-notion-text">Comments</h3>
+            <div className="flex items-center gap-2">
+              {!currentPage?.cover && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-notion-text-secondary hover:text-notion-text"
+                >
+                  <ImageIcon className="w-4 h-4 mr-2" />
+                  Add cover
+                </Button>
+              )}
+              
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsCommentsOpen(false)}
-                className="w-6 h-6 p-0 hover:bg-notion-hover"
+                onClick={() => setShowTemplateGallery(true)}
+                className="text-notion-text-secondary hover:text-notion-text"
               >
-                ×
+                <FileText className="w-4 h-4 mr-2" />
+                Templates
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-notion-text-secondary hover:text-notion-text"
+              >
+                <Search className="w-4 h-4" />
+              </Button>
+              
+              <Button variant="ghost" size="sm">
+                <Plus className="w-4 h-4" />
               </Button>
             </div>
-            <div className="text-center text-notion-text-secondary py-8">
-              <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No comments yet</p>
-              <p className="text-xs mt-1">Start a conversation</p>
-            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto">
+        {showTemplateGallery ? (
+          <TemplateGallery onClose={() => setShowTemplateGallery(false)} />
+        ) : (
+          <div className="max-w-4xl mx-auto p-6">
+            {currentPage ? (
+              <BlockEditor pageId={currentPage.id} />
+            ) : (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">📄</div>
+                <h2 className="text-xl font-medium text-notion-text mb-2">Welcome to Notion Clone</h2>
+                <p className="text-notion-text-secondary mb-6">Select a page from the sidebar or create a new one to get started.</p>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Page
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
-
-      {/* Template Gallery Modal */}
-      {showTemplateGallery && (
-        <TemplateGallery
-          onSelectTemplate={handleUseTemplate}
-          onClose={() => setShowTemplateGallery(false)}
-        />
-      )}
-
-      {/* Template Manager Modal */}
-      {showTemplateManager && (
-        <TemplateManager
-          blocks={blocks}
-          onSaveTemplate={handleSaveAsTemplate}
-          onClose={() => setShowTemplateManager(false)}
-        />
-      )}
     </div>
   );
 };

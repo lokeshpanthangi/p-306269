@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Template, ChevronDown } from 'lucide-react';
+import { FileText, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { templateService } from '@/services/templateService';
@@ -72,7 +72,7 @@ const TemplateButton: React.FC<TemplateButtonProps> = ({ onInsertTemplate }) => 
           size="sm"
           className="h-8 px-3 text-notion-text-secondary hover:text-notion-text hover:bg-notion-hover"
         >
-          <Template className="w-4 h-4 mr-2" />
+          <FileText className="w-4 h-4 mr-2" />
           Templates
           <ChevronDown className="w-3 h-3 ml-1" />
         </Button>
@@ -104,7 +104,7 @@ const TemplateButton: React.FC<TemplateButtonProps> = ({ onInsertTemplate }) => 
                 // This would open the full template gallery
               }}
             >
-              <Template className="w-4 h-4 mr-2" />
+              <FileText className="w-4 h-4 mr-2" />
               Browse all templates
             </Button>
           </div>
