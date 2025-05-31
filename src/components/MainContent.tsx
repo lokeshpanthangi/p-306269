@@ -3,10 +3,22 @@ import React, { useState } from 'react';
 import { Share2, MessageCircle, ChevronRight, Smile, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import BlockEditor from './BlockEditor';
+import { BaseBlock } from '@/types/blocks';
 
 const MainContent: React.FC = () => {
   const [pageTitle, setPageTitle] = useState('Untitled');
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [blocks, setBlocks] = useState<BaseBlock[]>([
+    {
+      id: 'block-1',
+      type: 'paragraph',
+      content: {
+        text: 'Welcome to your new Notion clone! This is a sample paragraph. You can start typing to edit this content.',
+        formatting: []
+      }
+    }
+  ]);
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white">
@@ -77,63 +89,10 @@ const MainContent: React.FC = () => {
       {/* Content Area */}
       <div className="flex-1 flex">
         <div className="flex-1 p-6">
-          <div className="max-w-4xl mx-auto">
-            <div className="space-y-4">
-              {/* Content blocks */}
-              <div className="group flex items-start gap-2 py-1">
-                <div className="w-6 flex justify-center pt-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-6 h-6 p-0 opacity-0 group-hover:opacity-100 hover:bg-notion-hover notion-button"
-                  >
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Button>
-                </div>
-                <div className="flex-1">
-                  <Input
-                    placeholder="Type '/' for commands"
-                    className="border-none p-0 bg-transparent notion-input text-notion-text placeholder-notion-text-secondary focus:ring-0 text-base"
-                  />
-                </div>
-              </div>
-
-              <div className="group flex items-start gap-2 py-1">
-                <div className="w-6 flex justify-center pt-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-6 h-6 p-0 opacity-0 group-hover:opacity-100 hover:bg-notion-hover notion-button"
-                  >
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Button>
-                </div>
-                <div className="flex-1">
-                  <p className="text-notion-text">
-                    Welcome to your new Notion clone! This is a sample paragraph. You can start typing to edit this content.
-                  </p>
-                </div>
-              </div>
-
-              <div className="group flex items-start gap-2 py-1">
-                <div className="w-6 flex justify-center pt-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-6 h-6 p-0 opacity-0 group-hover:opacity-100 hover:bg-notion-hover notion-button"
-                  >
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Button>
-                </div>
-                <div className="flex-1">
-                  <Input
-                    placeholder="Type '/' for commands"
-                    className="border-none p-0 bg-transparent notion-input text-notion-text placeholder-notion-text-secondary focus:ring-0 text-base"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          <BlockEditor 
+            blocks={blocks}
+            onBlocksChange={setBlocks}
+          />
         </div>
 
         {/* Comments Panel */}
